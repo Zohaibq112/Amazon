@@ -1,4 +1,4 @@
-# Flipkart - MERN
+# Amazon - MERN
 Full-Stack Amazon with Admin Dashboard .
 
 [Visit Now]() 🚀
