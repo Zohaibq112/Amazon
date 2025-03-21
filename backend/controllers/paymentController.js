@@ -1,159 +1,89 @@
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const paytm = require('paytmchecksum');
-const https = require('https');
 const Payment = require('../models/paymentModel');
 const ErrorHandler = require('../utils/errorHandler');
 const { v4: uuidv4 } = require('uuid');
 
-// exports.processPayment = asyncErrorHandler(async (req, res, next) => {
-//     const myPayment = await stripe.paymentIntents.create({
-//         amount: req.body.amount,
-//         currency: "inr",
-//         metadata: {
-//             company: "Flipkart",
-//         },
-//     });
-
-//     res.status(200).json({
-//         success: true,
-//         client_secret: myPayment.client_secret, 
-//     });
-// });
-
-// exports.sendStripeApiKey = asyncErrorHandler(async (req, res, next) => {
-//     res.status(200).json({ stripeApiKey: process.env.STRIPE_API_KEY });
-// });
-
-// Process Payment
+// 📌 Process Payment (Auto-Approve)
 exports.processPayment = asyncErrorHandler(async (req, res, next) => {
+    try {
+        const { amount, email, phoneNo } = req.body;
+        const orderId = "oid" + uuidv4(); // Unique Order ID
+        const txnId = uuidv4(); // Fake Transaction ID
 
-    const { amount, email, phoneNo } = req.body;
+        console.log("✅ Auto-Approving Payment...");
+        console.log("💰 Amount:", amount);
+        console.log("📧 Email:", email);
+        console.log("📞 Phone No:", phoneNo);
+        console.log("🆔 Order ID:", orderId);
+        console.log("🔢 Transaction ID:", txnId);
 
-    var params = {};
+        // 📌 Store Fake Payment in Database with ALL required fields
+        const payment = new Payment({
+            orderId,
+            txnId,
+            txnAmount: amount.toString(), // Convert to string to match schema
+            resultInfo: {
+                resultStatus: "TXN_SUCCESS",
+                resultCode: "01", // Fake Success Code
+                resultMsg: "Transaction Successful",
+            },
+            bankTxnId: uuidv4(), // Fake Bank Transaction ID
+            txnType: "Online", // Fake Transaction Type
+            gatewayName: "JazzCash", // Fake Payment Gateway
+            bankName: "Fake Bank", // Fake Bank Name
+            mid: "MID123456789", // Fake Merchant ID
+            paymentMode: "JazzCash Wallet", // Fake Payment Mode
+            refundAmt: "0.00", // No Refund
+            txnDate: new Date().toISOString(), // Fake Transaction Date
+        });
 
-    /* initialize an array */
-    params["MID"] = process.env.PAYTM_MID;
-    params["WEBSITE"] = process.env.PAYTM_WEBSITE;
-    params["CHANNEL_ID"] = process.env.PAYTM_CHANNEL_ID;
-    params["INDUSTRY_TYPE_ID"] = process.env.PAYTM_INDUSTRY_TYPE;
-    params["ORDER_ID"] = "oid" + uuidv4();
-    params["CUST_ID"] = process.env.PAYTM_CUST_ID;
-    params["TXN_AMOUNT"] = JSON.stringify(amount);
-    // params["CALLBACK_URL"] = `${req.protocol}://${req.get("host")}/api/v1/callback`;
-    params["CALLBACK_URL"] = `https://${req.get("host")}/api/v1/callback`;
-    params["EMAIL"] = email;
-    params["MOBILE_NO"] = phoneNo;
+        await payment.save(); // Save payment in MongoDB
 
-    let paytmChecksum = paytm.generateSignature(params, process.env.PAYTM_MERCHANT_KEY);
-    paytmChecksum.then(function (checksum) {
-
-        let paytmParams = {
-            ...params,
-            "CHECKSUMHASH": checksum,
-        };
+        console.log("✅ Payment Approved & Saved!");
 
         res.status(200).json({
-            paytmParams
+            success: true,
+            message: "Payment approved successfully!",
+            orderId,
+            txnId,
         });
 
-    }).catch(function (error) {
-        console.log(error);
-    });
+    } catch (error) {
+        console.error("❌ Payment Processing Error:", error);
+        return next(new ErrorHandler("Payment processing failed!", 500));
+    }
 });
 
-// Paytm Callback
-exports.paytmResponse = (req, res, next) => {
-
-    // console.log(req.body);
-
-    let paytmChecksum = req.body.CHECKSUMHASH;
-    delete req.body.CHECKSUMHASH;
-
-    let isVerifySignature = paytm.verifySignature(req.body, process.env.PAYTM_MERCHANT_KEY, paytmChecksum);
-    if (isVerifySignature) {
-        // console.log("Checksum Matched");
-
-        var paytmParams = {};
-
-        paytmParams.body = {
-            "mid": req.body.MID,
-            "orderId": req.body.ORDERID,
-        };
-
-        paytm.generateSignature(JSON.stringify(paytmParams.body), process.env.PAYTM_MERCHANT_KEY).then(function (checksum) {
-
-            paytmParams.head = {
-                "signature": checksum
-            };
-
-            /* prepare JSON string for request */
-            var post_data = JSON.stringify(paytmParams);
-
-            var options = {
-                /* for Staging */
-                hostname: 'securegw-stage.paytm.in',
-                /* for Production */
-                // hostname: 'securegw.paytm.in',
-                port: 443,
-                path: '/v3/order/status',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': post_data.length
-                }
-            };
-
-            // Set up the request
-            var response = "";
-            var post_req = https.request(options, function (post_res) {
-                post_res.on('data', function (chunk) {
-                    response += chunk;
-                });
-
-                post_res.on('end', function () {
-                    let { body } = JSON.parse(response);
-                    // let status = body.resultInfo.resultStatus;
-                    // res.json(body);
-                    addPayment(body);
-                    // res.redirect(`${req.protocol}://${req.get("host")}/order/${body.orderId}`)
-                    res.redirect(`https://${req.get("host")}/order/${body.orderId}`)
-                });
-            });
-
-            // post the data
-            post_req.write(post_data);
-            post_req.end();
-        });
-
-    } else {
-        console.log("Checksum Mismatched");
-    }
-}
-
-const addPayment = async (data) => {
-    try {
-        await Payment.create(data);
-    } catch (error) {
-        console.log("Payment Failed!");
-    }
-}
-
+// 📌 Get Payment Status
 exports.getPaymentStatus = asyncErrorHandler(async (req, res, next) => {
+    try {
+        const orderId = req.params.id.trim(); // Ensure no extra spaces
 
-    const payment = await Payment.findOne({ orderId: req.params.id });
+        console.log("🔍 Checking Payment Status for Order ID:", orderId);
 
-    if (!payment) {
-        return next(new ErrorHandler("Payment Details Not Found", 404));
+        if (!orderId || orderId === "success") {
+            console.warn("⚠️ Invalid Order ID received:", orderId);
+            return next(new ErrorHandler("Invalid Order ID", 400));
+        }
+
+        const payment = await Payment.findOne({ orderId });
+
+        if (!payment) {
+            console.warn("⚠️ Payment not found for Order ID:", orderId);
+            return next(new ErrorHandler("Payment Details Not Found", 404));
+        }
+
+        console.log("✅ Payment Found:", payment);
+
+        res.status(200).json({
+            success: true,
+            txn: {
+                id: payment.txnId,
+                status: payment.resultInfo.resultStatus,
+            },
+        });
+    } catch (error) {
+        console.error("❌ Error Fetching Payment Status:", error);
+        return next(new ErrorHandler("Failed to fetch payment status!", 500));
     }
-
-    const txn = {
-        id: payment.txnId,
-        status: payment.resultInfo.resultStatus,
-    }
-
-    res.status(200).json({
-        success: true,
-        txn,
-    });
 });

@@ -12,11 +12,10 @@ import RadioGroup from '@mui/material/RadioGroup';
 import MetaData from '../Layouts/MetaData';
 
 const Payment = () => {
-
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
     const [payDisable, setPayDisable] = useState(false);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("easypaisa");
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("jazzcash"); // Default to JazzCash
 
     const { shippingInfo, cartItems } = useSelector((state) => state.cart);
     const { user } = useSelector((state) => state.user);
@@ -35,23 +34,26 @@ const Payment = () => {
         e.preventDefault();
         setPayDisable(true);
 
+        console.log("🛠 Sending Payment Data for JazzCash:", paymentData);
+
         try {
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            };
+            const config = { headers: { "Content-Type": "application/json" } };
 
             const { data } = await axios.post(
-                '/api/v1/payment/process',
+                `/api/v1/payment/process`, // Backend API
                 paymentData,
-                config,
+                config
             );
 
-            enqueueSnackbar(`Redirecting to ${selectedPaymentMethod} payment`, { variant: "info" });
+            console.log("✅ JazzCash Payment Response:", data);
+            enqueueSnackbar("Payment successful!", { variant: "success" });
+
+            // Redirect to Order Success Page
+            window.location.href = `/order/success`;
 
         } catch (error) {
             setPayDisable(false);
+            console.error("❌ Payment Error:", error.response?.data?.message || error);
             enqueueSnackbar(error.response?.data?.message || "Payment failed!", { variant: "error" });
         }
     };
@@ -65,7 +67,7 @@ const Payment = () => {
 
     return (
         <>
-            <MetaData title="Secure Payment | Easypaisa / JazzCash" />
+            <MetaData title="Secure Payment | JazzCash" />
 
             <main className="w-full mt-20">
                 <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-11/12 mt-0 sm:mt-4 m-auto sm:mb-7">
@@ -79,22 +81,10 @@ const Payment = () => {
                                     <FormControl>
                                         <RadioGroup
                                             aria-labelledby="payment-radio-group"
-                                            defaultValue="easypaisa"
+                                            defaultValue="jazzcash"
                                             name="payment-radio-button"
                                             onChange={(e) => setSelectedPaymentMethod(e.target.value)}
                                         >
-                                            {/* Easypaisa */}
-                                            <FormControlLabel
-                                                value="easypaisa"
-                                                control={<Radio />}
-                                                label={
-                                                    <div className="flex items-center gap-4">
-                                                        <img draggable="false" className="h-6 w-6 object-contain" src="https://upload.wikimedia.org/wikipedia/commons/2/24/Easypaisa_New_Logo.png" alt="Easypaisa Logo" />
-                                                        <span>Easypaisa</span>
-                                                    </div>
-                                                }
-                                            />
-
                                             {/* JazzCash */}
                                             <FormControlLabel
                                                 value="jazzcash"

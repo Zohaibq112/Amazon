@@ -263,11 +263,11 @@ const ProductDetails = () => {
                                     </div>
                                     {/* <!-- seller details --> */}
 
-                                    {/* <!-- flipkart plus banner --> */}
+                                    {/* <!-- Amazon plus banner --> */}
                                     <div className="sm:w-1/2 mt-4 border">
                                         <img draggable="false" className="w-full h-full object-contain" src="https://img.freepik.com/premium-vector/ramadan-sale-banner_188398-124.jpg" alt="" />
                                     </div>
-                                    {/* <!-- flipkart plus banner --> */}
+                                    {/* <!-- Amazon plus banner --> */}
 
                                     {/* <!-- description details --> */}
                                     <div className="flex flex-col sm:flex-row gap-1 sm:gap-14 mt-4 items-stretch text-sm">

@@ -23,7 +23,7 @@ const footerLinks = [
         redirect: "",
       },
       {
-        name: "Flipkart Stories",
+        name: "Amazon Stories",
         redirect: "",
       },
       {
@@ -31,7 +31,7 @@ const footerLinks = [
         redirect: "",
       },
       {
-        name: "Flipkart Wholesale",
+        name: "Amazon Wholesale",
         redirect: "",
       },
       {

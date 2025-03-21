@@ -1,7 +1,7 @@
 {
-  "name": "flipkart",
+  "name": "Amazon",
   "version": "1.0.0",
-  "description": "Full Stack Flipkart Ecommerce",
+  "description": "Full Stack Amazon Ecommerce",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -27,7 +27,6 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.7",
     "nodemailer": "^6.7.2",
-    "paytmchecksum": "^1.5.0",
     "stripe": "^8.200.0",
     "uuid": "^8.3.2",
     "validator": "^13.7.0"
