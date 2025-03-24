@@ -22,17 +22,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// 🔹 CORS Setup (Fixes Frontend Request Block)
-const allowedOrigins = ["http://localhost:3000", "https://your-live-site.com"];
-
+// 🔹 CORS Setup (Allow All Origins - Use ONLY for Testing)
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: "*",  // Allows requests from any origin
     credentials: true,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type, Authorization",

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ADD_TO_WISHLIST, REMOVE_FROM_WISHLIST } from "../constants/wishlistConstants";
 
-const BASE_URL = "https://amazon-6-p147.onrender.com/api/v1"; // Use your deployed backend URL
+const BASE_URL = "https://amazon3-q2oo.onrender.com/api/v1"; // Use your deployed backend URL
 
 // Add To Wishlist
 export const addToWishlist = (id) => async (dispatch, getState) => {

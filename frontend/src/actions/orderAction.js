@@ -24,7 +24,7 @@ import {
     UPDATE_ORDER_SUCCESS,
 } from "../constants/orderConstants";
 
-const BASE_URL = "https://amazon-6-p147.onrender.com/api/v1"; // Your deployed backend
+const BASE_URL = "https://amazon3-q2oo.onrender.com/api/v1"; // Your deployed backend
 
 // 📌 New Order
 export const newOrder = (order) => async (dispatch) => {

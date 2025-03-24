@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ADD_TO_CART, EMPTY_CART, REMOVE_FROM_CART, SAVE_SHIPPING_INFO } from "../constants/cartConstants";
 
-const BASE_URL = "https://amazon-6-p147.onrender.com/api/v1"; // Your deployed backend
+const BASE_URL = "https://amazon3-q2oo.onrender.com/api/v1"; // Your deployed backend
 
 // add to cart
 export const addItemsToCart = (id, quantity = 1) => async (dispatch, getState) => {

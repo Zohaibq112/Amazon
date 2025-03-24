@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "proxy": "https://amazon-6-p147.onrender.com",
+  "proxy": "https://amazon3-q2oo.onrender.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

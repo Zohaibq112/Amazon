@@ -14,7 +14,7 @@ import {
     ALL_USERS_FAIL, ALL_USERS_SUCCESS, ALL_USERS_REQUEST
 } from '../constants/userConstants';
 
-const BASE_URL = 'https://amazon-6-p147.onrender.com/api/v1';  // Deployed Backend URL
+const BASE_URL = 'https://amazon3-q2oo.onrender.com/api/v1';  // Deployed Backend URL
 
 // Login User
 export const loginUser = (email, password) => async (dispatch) => {

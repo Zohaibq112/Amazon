@@ -33,7 +33,7 @@ import {
     SLIDER_PRODUCTS_FAIL,
 } from "../constants/productConstants";
 
-const BASE_URL = "https://amazon-6-p147.onrender.com/api/v1";
+const BASE_URL = "https://amazon3-q2oo.onrender.com/api/v1";
 
 // Get All Products --- Filter/Search/Sort
 export const getProducts = (keyword = "", category, price = [0, 200000], ratings = 0, currentPage = 1) => async (dispatch) => {
