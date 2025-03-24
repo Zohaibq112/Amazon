@@ -1,17 +1,14 @@
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-const cloudinary = require("cloudinary");
-const connectDatabase = require("./backend/config/database");
-
-require("dotenv").config(); // Load environment variables
-
-const app = require("./backend/app");
+const path = require('path');
+const express = require('express');
+const cors = require('cors');
+const cloudinary = require('cloudinary');
+const app = require('./backend/app');
+const connectDatabase = require('./backend/config/database');
 const PORT = process.env.PORT || 4000;
 
-// 🔴 Handle Uncaught Exceptions (e.g., undefined variables)
-process.on("uncaughtException", (err) => {
-    console.error(`Uncaught Exception: ${err.message}`);
+// 🔴 Handle Uncaught Exceptions
+process.on('uncaughtException', (err) => {
+    console.log(`Error: ${err.message}`);
     process.exit(1);
 });
 
@@ -25,7 +22,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// 🔹 CORS Setup (Allow Frontend Requests)
+// 🔹 CORS Setup (Fixes Frontend Request Block)
 const allowedOrigins = ["http://localhost:3000", "https://your-live-site.com"];
 
 app.use(cors({
@@ -33,7 +30,7 @@ app.use(cors({
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(null, false); // Blocks requests from unlisted origins
+            callback(new Error("Not allowed by CORS"));
         }
     },
     credentials: true,
@@ -41,25 +38,28 @@ app.use(cors({
     allowedHeaders: "Content-Type, Authorization",
 }));
 
-// 🔹 Serve Frontend in Production
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "frontend/build")));
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+// 🔹 Deployment
+__dirname = path.resolve();
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '/frontend/build')));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
     });
 } else {
-    app.get("/", (req, res) => {
-        res.send("Server is Running! 🚀");
+    app.get('/', (req, res) => {
+        res.send('Server is Running! 🚀');
     });
 }
 
 // 🔹 Start Server
 const server = app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// 🔴 Handle Unhandled Promise Rejections (e.g., MongoDB connection failure)
-process.on("unhandledRejection", (err) => {
-    console.error(`Unhandled Promise Rejection: ${err.message}`);
-    server.close(() => process.exit(1));
+// 🔴 Handle Unhandled Promise Rejections
+process.on('unhandledRejection', (err) => {
+    console.log(`Error: ${err.message}`);
+    server.close(() => {
+        process.exit(1);
+    });
 });
